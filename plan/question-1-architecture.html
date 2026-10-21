@@ -1,0 +1,208 @@
+<title>IR or RAG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap">
+
+<style>
+  :root {
+    --ground:#f6f8f9; --panel:#fff; --ink:#141a1f; --muted:#5c6a76;
+    --faint:#909da8; --rule:#d5dde2;
+    --a:#2f6f8f; --a-soft:#dbe9f0; --ok:#4a6f52; --no:#a0463c;
+    --fd:"Archivo",system-ui,sans-serif;
+    --fb:"Source Sans 3",system-ui,sans-serif;
+    --fm:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --ground:#0e1419; --panel:#161e25; --ink:#e4ebf0; --muted:#9aa8b4;
+    --faint:#6e7d89; --rule:#2a363f;
+    --a:#6fb3d2; --a-soft:#1b3744; --ok:#7fb389; --no:#d98377;
+  }}
+  :root[data-theme="dark"]{
+    --ground:#0e1419; --panel:#161e25; --ink:#e4ebf0; --muted:#9aa8b4;
+    --faint:#6e7d89; --rule:#2a363f;
+    --a:#6fb3d2; --a-soft:#1b3744; --ok:#7fb389; --no:#d98377;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:var(--fb); font-size:17px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .slide{
+    min-height:100dvh; max-width:68rem; margin:0 auto;
+    padding:clamp(1.5rem,4vh,3rem) 2rem;
+    display:flex; flex-direction:column; justify-content:center; gap:clamp(1rem,2.5vh,2rem);
+  }
+
+  .top{display:flex; justify-content:space-between; align-items:baseline; gap:1rem}
+  h1{
+    font-family:var(--fd); font-weight:700;
+    font-size:clamp(1.9rem,1.1rem+2.6vw,3rem); line-height:1.05;
+    letter-spacing:-0.025em; margin:0; text-wrap:balance;
+  }
+  .num{font-family:var(--fm); font-size:.8rem; color:var(--faint); white-space:nowrap}
+
+  /* two poles */
+  .poles{display:grid; grid-template-columns:1fr auto 1fr; gap:1.25rem; align-items:center}
+  .pole{background:var(--panel); border:1px solid var(--rule); padding:1rem 1.2rem}
+  .pole b{
+    display:block; font-family:var(--fm); font-size:.7rem; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--a); font-weight:500; margin-bottom:.6rem;
+  }
+  .pole pre{font-family:var(--fm); font-size:clamp(.72rem,.62rem+.22vw,.85rem); line-height:1.55; margin:0; overflow-x:auto}
+  .vs{font-family:var(--fd); font-weight:700; font-size:1.1rem; color:var(--faint)}
+  @media(max-width:46rem){.poles{grid-template-columns:1fr}.vs{text-align:center}}
+
+  /* slider */
+  .ends{
+    display:flex; justify-content:space-between; font-family:var(--fm);
+    font-size:.72rem; letter-spacing:.05em; text-transform:uppercase; color:var(--faint);
+  }
+  input[type=range]{
+    -webkit-appearance:none; appearance:none; width:100%; height:2.2rem;
+    background:transparent; margin:.3rem 0 0; cursor:grab;
+  }
+  input[type=range]::-webkit-slider-runnable-track{height:7px;border-radius:4px;background:var(--a);opacity:.35}
+  input[type=range]::-moz-range-track{height:7px;border-radius:4px;background:var(--a);opacity:.35}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none; width:1.7rem; height:1.7rem;
+    margin-top:-.62rem; border-radius:50%; background:var(--panel); border:3px solid var(--a);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:1.7rem;height:1.7rem;border-radius:50%;background:var(--panel);border:3px solid var(--a);
+  }
+  input[type=range]:focus-visible{outline:2px solid var(--a); outline-offset:5px}
+  .ticks{
+    display:grid; grid-template-columns:repeat(5,1fr); font-family:var(--fm);
+    font-size:.68rem; color:var(--faint);
+  }
+  .ticks span{text-align:center}
+  .ticks span:first-child{text-align:left}
+  .ticks span:last-child{text-align:right}
+  .ticks span.on{color:var(--ink); font-weight:500}
+
+  /* answer */
+  .card{background:var(--panel); border:1px solid var(--rule); border-top:3px solid var(--a)}
+  .card h2{
+    font-family:var(--fd); font-weight:600; font-size:clamp(1.15rem,1rem+.6vw,1.5rem);
+    letter-spacing:-.01em; margin:0; padding:1.1rem 1.4rem .15rem;
+  }
+  .card .sub{color:var(--muted); margin:0; padding:0 1.4rem 1.1rem; max-width:70ch}
+  .cols{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--rule)}
+  .cols>div{background:var(--panel); padding:1.1rem 1.4rem}
+  .cols h3{
+    font-family:var(--fm); font-size:.68rem; letter-spacing:.1em; text-transform:uppercase;
+    margin:0 0 .6rem; font-weight:500;
+  }
+  .plus h3{color:var(--ok)} .minus h3{color:var(--no)}
+  .cols ul{margin:0; padding-left:1.15rem}
+  .cols li{margin-bottom:.4rem}
+  @media(max-width:46rem){.cols{grid-template-columns:1fr}}
+
+  .props{
+    display:flex; flex-wrap:wrap; gap:.4rem .5rem; padding:.9rem 1.4rem;
+    border-top:1px solid var(--rule); font-family:var(--fm); font-size:.72rem;
+  }
+  .props span{padding:.2rem .55rem; border:1px solid var(--rule); color:var(--muted)}
+  .props span.y{color:var(--ok); border-color:var(--ok)}
+  .props span.n{color:var(--no); border-color:var(--no)}
+  .hint{font-family:var(--fm); font-size:.68rem; color:var(--faint); text-align:right}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="slide">
+  <div class="top">
+    <h1>IR or RAG?</h1>
+    <div class="num">1 / 2</div>
+  </div>
+
+  <div class="poles">
+    <div class="pole">
+      <b>A &middot; typed intermediate representation</b>
+<pre>Requirement
+   │  model fills a typed schema
+   ▼
+      IR        ← checked here
+   │  deterministic templates
+   ▼
+ SysML v2</pre>
+    </div>
+    <div class="vs">VS</div>
+    <div class="pole">
+      <b>B &middot; retrieval-augmented generation</b>
+<pre>Requirement
+   │  retrieve similar examples
+   ▼
+ few-shot context
+   │  model writes the notation
+   ▼
+ SysML v2    ← checked only here</pre>
+    </div>
+  </div>
+
+  <div>
+    <div class="ends"><span>schema decides</span><span>retrieval decides</span></div>
+    <input type="range" id="d" min="0" max="4" step="1" value="0"
+           aria-label="How much authority moves from the schema to retrieval">
+    <div class="ticks" id="k">
+      <span>Pure IR</span><span>+ examples</span><span>+ grounding</span><span>Hybrid</span><span>Pure RAG</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 id="t"></h2>
+    <p class="sub" id="s"></p>
+    <div class="cols">
+      <div class="plus"><h3>Gains</h3><ul id="p"></ul></div>
+      <div class="minus"><h3>Costs</h3><ul id="m"></ul></div>
+    </div>
+    <div class="props" id="x"></div>
+  </div>
+
+  <div class="hint">drag &middot; or &larr; &rarr;</div>
+</div>
+
+<script>
+  const S = [
+    { t:"Pure IR", s:"Every construct passes through a typed, reviewed schema. No retrieval anywhere.",
+      p:["Checkable before it becomes text","Same input, same output — diffs mean something","Testable end to end with no model in the loop"],
+      m:["The schema is a ceiling: no behaviour, no interfaces","Every new construct costs schema plus template work","No examples in the prompt, so accuracy rests on field descriptions"],
+      x:[1,1,1] },
+
+    { t:"IR + retrieved examples", s:"Retrieval picks the most similar examples into the prompt. The schema still decides the output.",
+      p:["Usually the cheapest accuracy gain available","Nothing new can break — guarantees unchanged","No change to what can be expressed"],
+      m:["Needs a corpus of examples to retrieve from","Retrieval quality becomes a second thing to evaluate"],
+      x:[1,1,1] },
+
+    { t:"IR + grounding", s:"Retrieval also decides which system element a phrase refers to, seeded from existing models or a glossary.",
+      p:["Attacks the biggest real error class: one pump, four parts","An existing model becomes grounding instead of dead weight","Still fully checkable — retrieval informs, the schema decides"],
+      m:["Embeddings plus a merge step to build and maintain","Ambiguous merges need a human or a model to arbitrate","Naming must stay stable between runs"],
+      x:[1,1,1] },
+
+    { t:"Hybrid", s:"The schema keeps requirements, parts and constraints. Anything beyond it is generated from examples.",
+      p:["Breaks the ceiling without giving up the core","New construct types need no code change","A path to behaviour and interfaces"],
+      m:["Two code paths, two failure modes, two things to evaluate","The generated half is checkable only after rendering","Diffs stable on one half, noisy on the other"],
+      x:[2,2,2] },
+
+    { t:"Pure RAG", s:"Retrieve similar requirement-and-model pairs, and let the model write the notation directly.",
+      p:["No ceiling — anything in the corpus is expressible","No schema or template work as the language grows","An existing model corpus is used directly"],
+      m:["The model writes the notation it is weakest at","Non-deterministic, so two runs differ and diffs are noise","Nothing to check or repair before the text exists","Needs paired requirement-and-model data that does not exist yet"],
+      x:[0,0,0] }
+  ];
+  const LBL = ["checkable before rendering","deterministic output","automatic repair possible"];
+  const CLS = ["n","y","" ], MARK = ["no","yes","partly"];
+
+  const d = document.getElementById("d"), k = [...document.getElementById("k").children];
+  function paint(){
+    const i = +d.value, s = S[i];
+    document.getElementById("t").textContent = s.t;
+    document.getElementById("s").textContent = s.s;
+    document.getElementById("p").innerHTML = s.p.map(v=>`<li>${v}</li>`).join("");
+    document.getElementById("m").innerHTML = s.m.map(v=>`<li>${v}</li>`).join("");
+    document.getElementById("x").innerHTML = LBL.map(
+      (l,n)=>`<span class="${CLS[s.x[n]]}">${l}: ${MARK[s.x[n]]}</span>`).join("");
+    k.forEach((e,n)=>e.classList.toggle("on", n===i));
+  }
+  d.addEventListener("input", paint); paint();
+</script>

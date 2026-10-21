@@ -1,0 +1,226 @@
+<title>Performance or Integration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap">
+
+<style>
+  :root {
+    --ground:#f6f8f9; --panel:#fff; --ink:#141a1f; --muted:#5c6a76;
+    --faint:#909da8; --rule:#d5dde2;
+    --a:#2f6f8f; --a-soft:#dbe9f0; --g:#b06a1f; --g-soft:#f6e6d2;
+    --ok:#4a6f52; --no:#a0463c; --no-soft:#f4e0dd;
+    --fd:"Archivo",system-ui,sans-serif;
+    --fb:"Source Sans 3",system-ui,sans-serif;
+    --fm:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --ground:#0e1419; --panel:#161e25; --ink:#e4ebf0; --muted:#9aa8b4;
+    --faint:#6e7d89; --rule:#2a363f;
+    --a:#6fb3d2; --a-soft:#1b3744; --g:#e0a257; --g-soft:#3b2a15;
+    --ok:#7fb389; --no:#d98377; --no-soft:#3a211e;
+  }}
+  :root[data-theme="dark"]{
+    --ground:#0e1419; --panel:#161e25; --ink:#e4ebf0; --muted:#9aa8b4;
+    --faint:#6e7d89; --rule:#2a363f;
+    --a:#6fb3d2; --a-soft:#1b3744; --g:#e0a257; --g-soft:#3b2a15;
+    --ok:#7fb389; --no:#d98377; --no-soft:#3a211e;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:var(--fb); font-size:17px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .slide{
+    min-height:100dvh; max-width:68rem; margin:0 auto;
+    padding:clamp(1.5rem,4vh,3rem) 2rem;
+    display:flex; flex-direction:column; justify-content:center; gap:clamp(1rem,2.4vh,1.9rem);
+  }
+
+  .top{display:flex; justify-content:space-between; align-items:baseline; gap:1rem}
+  h1{
+    font-family:var(--fd); font-weight:700;
+    font-size:clamp(1.9rem,1.1rem+2.6vw,3rem); line-height:1.05;
+    letter-spacing:-.025em; margin:0; text-wrap:balance;
+  }
+  .num{font-family:var(--fm); font-size:.8rem; color:var(--faint); white-space:nowrap}
+
+  /* the premise, two lines */
+  .premise{
+    background:var(--no-soft); border-left:3px solid var(--no);
+    padding:.9rem 1.2rem; max-width:72ch;
+  }
+  .premise p{margin:0; font-size:1.02rem}
+  .premise p+p{margin-top:.45rem; color:var(--muted); font-size:.95rem}
+  .premise b{font-weight:600}
+
+  /* budget */
+  .bar{
+    display:flex; height:2.6rem; border:1px solid var(--rule);
+    font-family:var(--fm); font-size:.75rem; overflow:hidden;
+  }
+  .bar div{display:flex; align-items:center; justify-content:center; white-space:nowrap; overflow:hidden}
+  .bar .p{background:var(--a-soft); color:var(--a)}
+  .bar .i{background:var(--g-soft); color:var(--g)}
+
+  /* slider */
+  .ends{
+    display:flex; justify-content:space-between; font-family:var(--fm);
+    font-size:.72rem; letter-spacing:.05em; text-transform:uppercase;
+  }
+  .ends .l{color:var(--a)} .ends .r{color:var(--g)}
+  input[type=range]{
+    -webkit-appearance:none; appearance:none; width:100%; height:2.2rem;
+    background:transparent; margin:.3rem 0 0; cursor:grab;
+  }
+  input[type=range]::-webkit-slider-runnable-track{
+    height:7px;border-radius:4px;background:linear-gradient(90deg,var(--a),var(--g));
+  }
+  input[type=range]::-moz-range-track{
+    height:7px;border-radius:4px;background:linear-gradient(90deg,var(--a),var(--g));
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none; width:1.7rem; height:1.7rem;
+    margin-top:-.62rem; border-radius:50%; background:var(--panel); border:3px solid var(--ink);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:1.7rem;height:1.7rem;border-radius:50%;background:var(--panel);border:3px solid var(--ink);
+  }
+  input[type=range]:focus-visible{outline:2px solid var(--a); outline-offset:5px}
+  .ticks{
+    display:grid; grid-template-columns:repeat(5,1fr); font-family:var(--fm);
+    font-size:.68rem; color:var(--faint);
+  }
+  .ticks span{text-align:center}
+  .ticks span:first-child{text-align:left}
+  .ticks span:last-child{text-align:right}
+  .ticks span.on{color:var(--ink); font-weight:500}
+
+  /* answer */
+  .card{background:var(--panel); border:1px solid var(--rule); border-top:3px solid var(--g)}
+  .card h2{
+    font-family:var(--fd); font-weight:600; font-size:clamp(1.15rem,1rem+.6vw,1.5rem);
+    letter-spacing:-.01em; margin:0; padding:1.1rem 1.4rem .15rem;
+  }
+  .card .sub{color:var(--muted); margin:0; padding:0 1.4rem 1.1rem; max-width:70ch}
+  .cols{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--rule)}
+  .cols>div{background:var(--panel); padding:1.1rem 1.4rem}
+  .cols h3{
+    font-family:var(--fm); font-size:.68rem; letter-spacing:.1em; text-transform:uppercase;
+    margin:0 0 .6rem; font-weight:500;
+  }
+  .plus h3{color:var(--ok)} .minus h3{color:var(--no)}
+  .cols ul{margin:0; padding-left:1.15rem}
+  .cols li{margin-bottom:.4rem}
+  @media(max-width:46rem){.cols{grid-template-columns:1fr}}
+
+  .chips{
+    display:flex; flex-wrap:wrap; gap:.35rem; padding:.9rem 1.4rem;
+    border-top:1px solid var(--rule); font-family:var(--fm); font-size:.72rem;
+  }
+  .chips span{padding:.2rem .55rem; border:1px solid var(--rule); color:var(--faint)}
+  .chips span.in{background:var(--g-soft); border-color:var(--g); color:var(--g)}
+  .risk{
+    padding:.85rem 1.4rem; border-top:1px solid var(--rule);
+    font-family:var(--fm); font-size:.76rem; color:var(--muted);
+  }
+  .risk b{color:var(--no); font-weight:500}
+  .hint{font-family:var(--fm); font-size:.68rem; color:var(--faint); text-align:right}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="slide">
+  <div class="top">
+    <h1>Performance or integration?</h1>
+    <div class="num">2 / 2</div>
+  </div>
+
+  <div class="premise">
+    <p>The task is an open research question. <b>No approach reaches 98&nbsp;% correct.</b></p>
+    <p>So optimising toward it has no stopping rule. The reachable bar is a different
+       one: <b>never silently wrong</b> &mdash; everything uncertain flagged, everything
+       unmodellable recorded with a reason.</p>
+  </div>
+
+  <div>
+    <div class="bar">
+      <div class="p" id="bp">performance</div>
+      <div class="i" id="bi">integration</div>
+    </div>
+  </div>
+
+  <div>
+    <div class="ends"><span class="l">how good can it get</span><span class="r">how far does it reach</span></div>
+    <input type="range" id="d" min="0" max="4" step="1" value="0"
+           aria-label="Balance between extraction quality and system integration">
+    <div class="ticks" id="k">
+      <span>All performance</span><span>+ source</span><span>Balanced</span><span>+ documents</span><span>All integration</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 id="t"></h2>
+    <p class="sub" id="s"></p>
+    <div class="cols">
+      <div class="plus"><h3>You get</h3><ul id="p"></ul></div>
+      <div class="minus"><h3>You give up</h3><ul id="m"></ul></div>
+    </div>
+    <div class="chips" id="c"></div>
+    <div class="risk">biggest risk: <b id="r"></b></div>
+  </div>
+
+  <div class="hint">drag &middot; or &larr; &rarr;</div>
+</div>
+
+<script>
+  const ALL = ["Polarion","Cameo","PowerPoint","Word","SharePoint","Deployment"];
+  const S = [
+    { t:"All performance", s:"Dataset, metrics, extraction, repair, grounding, model comparison. No interfaces — input and output are files.",
+      p:["You learn how good this can get, with a number","Every later decision rests on evidence","The research question gets a real answer"],
+      m:["Nobody can use it — both ends are manual","No feedback from engineers until far too late","Optimising toward an unreachable number never ends"],
+      split:100, sys:[], r:"a good tool nobody adopts" },
+
+    { t:"Performance + the requirement source", s:"The full quality programme, and requirements come from the real system. Everything after the model stays manual.",
+      p:["Real requirements, so measured quality is real quality","Almost all effort still on the hard question","The interface with the clearest payoff per week"],
+      m:["Output lands in a folder somebody has to carry onward","No modelling tool, no documents, no filing","The engineer's workflow is untouched, so adoption is untested"],
+      split:80, sys:["Polarion"], r:"the last mile never gets built" },
+
+    { t:"Balanced", s:"Measured and improving quality, plus requirements in and a model out. Documents and filing stay out.",
+      p:["Quality is measured against a real baseline","A complete chain exists end to end","Both halves are far enough along to judge honestly"],
+      m:["No PowerPoint or Word, no filing, no deployment","The modelling-tool link is thin and one-way","Tuning depth and human review both drop"],
+      split:60, sys:["Polarion","Cameo"], r:"neither half fully convinces" },
+
+    { t:"Integration + documents", s:"Add PowerPoint, Word and filing. Extraction keeps its first baseline; grounding and tuning go.",
+      p:["Output lands where people already look","Documents are the most visible deliverable","Five of the six interfaces covered"],
+      m:["No grounding, so one component stays several parts","Quality measured once and never improved","Every run replaces rather than updates"],
+      split:35, sys:["Polarion","Cameo","PowerPoint","Word","SharePoint"], r:"polished delivery of mediocre models" },
+
+    { t:"All integration", s:"Every interface connected, including deployment with SSO and authorisation. Extraction is whatever the first working version produces.",
+      p:["The whole workflow exists and can be demonstrated","Every named interface is covered","Deployment and access are solved, not deferred"],
+      m:["Quality unknown — no dataset, no metrics, no baseline","No way to tell whether a model is right, so no way to improve it","The quality bar cannot be verified, only hoped for"],
+      split:10, sys:ALL, r:"wrong models at scale, and people trust them" }
+  ];
+
+  const d = document.getElementById("d"), k = [...document.getElementById("k").children];
+  const WEEKS = 24;
+  function paint(){
+    const i = +d.value, s = S[i];
+    document.getElementById("t").textContent = s.t;
+    document.getElementById("s").textContent = s.s;
+    document.getElementById("p").innerHTML = s.p.map(v=>`<li>${v}</li>`).join("");
+    document.getElementById("m").innerHTML = s.m.map(v=>`<li>${v}</li>`).join("");
+    document.getElementById("r").textContent = s.r;
+    document.getElementById("c").innerHTML = ALL.map(
+      n=>`<span class="${s.sys.includes(n)?"in":""}">${n}</span>`).join("");
+
+    const bp = document.getElementById("bp"), bi = document.getElementById("bi");
+    bp.style.flexBasis = s.split + "%";
+    bi.style.flexBasis = (100 - s.split) + "%";
+    bp.textContent = s.split >= 25 ? `quality · ${Math.round(WEEKS*s.split/100)} weeks` : "";
+    bi.textContent = s.split <= 75 ? `integration · ${Math.round(WEEKS*(100-s.split)/100)} weeks` : "";
+
+    k.forEach((e,n)=>e.classList.toggle("on", n===i));
+  }
+  d.addEventListener("input", paint); paint();
+</script>
